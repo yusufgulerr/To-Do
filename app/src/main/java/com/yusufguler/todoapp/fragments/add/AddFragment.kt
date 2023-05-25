@@ -1,19 +1,16 @@
 package com.yusufguler.todoapp.fragments.add
 
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.yusufguler.todoapp.R
-import com.yusufguler.todoapp.data.models.Priority
 import com.yusufguler.todoapp.data.models.ToDoData
 import com.yusufguler.todoapp.data.viewmodel.ToDoViewModel
 import com.yusufguler.todoapp.databinding.FragmentAddBinding
-import com.yusufguler.todoapp.databinding.FragmentListBinding
-import com.yusufguler.todoapp.fragments.SharedViewModel
+import com.yusufguler.todoapp.data.viewmodel.SharedViewModel
 
 
 class AddFragment : Fragment() {

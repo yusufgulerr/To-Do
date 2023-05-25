@@ -1,5 +1,6 @@
 package com.yusufguler.todoapp.fragments.update
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
@@ -8,12 +9,10 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.yusufguler.todoapp.R
-import com.yusufguler.todoapp.data.models.Priority
 import com.yusufguler.todoapp.data.models.ToDoData
 import com.yusufguler.todoapp.data.viewmodel.ToDoViewModel
-import com.yusufguler.todoapp.databinding.FragmentAddBinding
 import com.yusufguler.todoapp.databinding.FragmentUpdateBinding
-import com.yusufguler.todoapp.fragments.SharedViewModel
+import com.yusufguler.todoapp.data.viewmodel.SharedViewModel
 
 
 class UpdateFragment : Fragment() {
@@ -48,9 +47,11 @@ class UpdateFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.menu_save){
-            updateItem()
+        when(item.itemId){
+            R.id.menu_save -> updateItem()
+            R.id.menu_delete -> confirmItemRemoval()
         }
+
         return super.onOptionsItemSelected(item)
     }
 
@@ -79,6 +80,19 @@ class UpdateFragment : Fragment() {
             Toast.makeText(requireContext(),"Please fill out all fields",Toast.LENGTH_LONG).show()
         }
 
+    }
+    //show AlertDialog to Confirm Removal of  Item
+    private fun confirmItemRemoval() {
+        val alertDialog = AlertDialog.Builder(requireContext())
+        alertDialog.setPositiveButton("Yes"){_,_ ->
+            mToDoViewModel.deleteData(args.current)
+            Toast.makeText(requireContext(),"Deleted",Toast.LENGTH_LONG).show()
+            findNavController().navigate(R.id.action_updateFragment_to_listFragment)
+        }
+        alertDialog.setNegativeButton("No"){_,_ -> }
+        alertDialog.setTitle("Delete '${args.current.title}'?")
+        alertDialog.setMessage("Are you sure you want to remove '${args.current.title}'")
+        alertDialog.create().show()
     }
     override fun onDestroyView() {
         super.onDestroyView()
