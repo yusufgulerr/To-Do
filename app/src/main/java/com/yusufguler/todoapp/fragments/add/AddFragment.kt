@@ -13,6 +13,7 @@ import com.yusufguler.todoapp.data.models.ToDoData
 import com.yusufguler.todoapp.data.viewmodel.ToDoViewModel
 import com.yusufguler.todoapp.databinding.FragmentAddBinding
 import com.yusufguler.todoapp.databinding.FragmentListBinding
+import com.yusufguler.todoapp.fragments.SharedViewModel
 
 
 class AddFragment : Fragment() {
@@ -20,7 +21,7 @@ class AddFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val mToDoViewModel : ToDoViewModel by viewModels()
-
+    private val mSharedViewModel : SharedViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,9 +31,12 @@ class AddFragment : Fragment() {
         val view = binding.root
         //set menu
         setHasOptionsMenu(true)
+
+        binding.prioritiesSpinner.onItemSelectedListener = mSharedViewModel.listener
+
         return view
     }
-
+    @Deprecated("")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.add_fragment_menu,menu)
     }
@@ -55,13 +59,13 @@ class AddFragment : Fragment() {
         val mPriority = binding.prioritiesSpinner.selectedItem.toString()
         val mDescription = binding.descriptionEt.text.toString()
 
-        val validation = verifyDataFromUser(mTitle,mDescription)
+        val validation = mSharedViewModel.verifyDataFromUser(mTitle,mDescription)
         if (validation){
             //insert data to database
             val newData = ToDoData(
                 0,
                 mTitle,
-                parsePriority(mPriority),
+                mSharedViewModel.parsePriority(mPriority),
                 mDescription
             )
             mToDoViewModel.insertData(newData)
@@ -72,17 +76,5 @@ class AddFragment : Fragment() {
             Toast.makeText(requireContext(),"Please fill out all fields",Toast.LENGTH_LONG).show()
         }
     }
-    private fun verifyDataFromUser(title:String,description:String):Boolean{
-        return if(TextUtils.isEmpty(title) || TextUtils.isEmpty(description)){
-            false
-        }else !(title.isEmpty() || description.isEmpty())
-    }
-    private fun parsePriority(priority: String):Priority{
-        return when(priority){
-            "High Priority" -> {Priority.HIGH}
-            "High Medium" -> {Priority.MEDIUM}
-            "High Low" -> {Priority.LOW}
-            else -> Priority.LOW
-        }
-    }
+
 }
