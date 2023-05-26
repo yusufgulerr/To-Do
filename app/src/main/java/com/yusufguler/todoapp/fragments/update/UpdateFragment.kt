@@ -32,9 +32,10 @@ class UpdateFragment : Fragment() {
         _binding = FragmentUpdateBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        binding.currentTitleEt.setText(args.current.title)
-        binding.currentDescriptionEt.setText(args.current.description)
-        binding.currentPrioritiesSpinner.setSelection(mSharedViewModel.parsePriorityToInt(args.current.priority))
+
+        binding.args = args
+
+        //Spinner Item Selected Listener
         binding.currentPrioritiesSpinner.onItemSelectedListener = mSharedViewModel.listener
 
         setHasOptionsMenu(true)

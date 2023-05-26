@@ -16,9 +16,13 @@ import java.util.zip.Inflater
 
 class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
 
-    var dataList = emptyList<ToDoData>()
+     private var dataList = emptyList<ToDoData>()
 
-    class MyViewHolder(val binding: RowLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
+    class MyViewHolder( val binding: RowLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(toDoData: ToDoData){
+            binding.toDoData = toDoData
+            binding.executePendingBindings()
+        }
 
     }
 
@@ -32,33 +36,8 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.binding.titleTxt.text = dataList[position].title
-        holder.binding.descriptionTxt.text = dataList[position].description
-
-        holder.binding.rowBackground.setOnClickListener {
-            val action = ListFragmentDirections.actionListFragmentToUpdateFragment(dataList[position])
-            holder.itemView.findNavController().navigate(action)
-        }
-
-        val priority = dataList[position].priority
-        when (priority) {
-            Priority.HIGH -> holder.binding.priorityIndicator.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    holder.itemView.context, R.color.red
-                )
-            )
-            Priority.LOW -> holder.binding.priorityIndicator.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    holder.itemView.context, R.color.yellow
-                )
-            )
-            Priority.MEDIUM -> holder.binding.priorityIndicator.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    holder.itemView.context, R.color.green
-                )
-            )
-
-        }
+        val currentItem = dataList[position]
+        holder.bind(currentItem)
     }
     fun setData(toDoData: List<ToDoData>){
         this.dataList = toDoData

@@ -20,10 +20,10 @@ class ListFragment : Fragment() {
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
 
-    private val mToDoViewModel : ToDoViewModel by viewModels()
-    private val mSharedViewModel : SharedViewModel by viewModels()
+    private val mToDoViewModel: ToDoViewModel by viewModels()
+    private val mSharedViewModel: SharedViewModel by viewModels()
 
-    private val adapter : ListAdapter by lazy {ListAdapter()}
+    private val adapter: ListAdapter by lazy { ListAdapter() }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -31,21 +31,19 @@ class ListFragment : Fragment() {
         _binding = FragmentListBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        val recyclerView = binding.recyclerView
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(requireActivity())
+        binding.lifecycleOwner = this
+        binding.mSharedViewModel = mSharedViewModel
 
+        //set up recyclerview
+        setupRecyclerView()
+
+        //Observe live data
         mToDoViewModel.getAllData.observe(viewLifecycleOwner, Observer { data ->
             mSharedViewModel.checkIfDatabaseEmpty(data)
             adapter.setData(data)
         })
-        mSharedViewModel.emptyDatabase.observe(viewLifecycleOwner, Observer {
-            showEmptyDatabaseViews(it)
-        })
 
-        binding.floatingActionButton.setOnClickListener {
-            findNavController().navigate(R.id.action_listFragment_to_addFragment)
-        }
+
 
         //set menu
         setHasOptionsMenu(true)
@@ -55,38 +53,38 @@ class ListFragment : Fragment() {
 
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.list_fragment_menu,menu)
+        inflater.inflate(R.menu.list_fragment_menu, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.menu_delete_all){
+        if (item.itemId == R.id.menu_delete_all) {
             confirmRemoval()
         }
 
         return super.onOptionsItemSelected(item)
     }
+
     //Show AlertDialog to Confirm Removal of All Items from Data Base Table
     private fun confirmRemoval() {
         val alertDialog = AlertDialog.Builder(requireContext())
-        alertDialog.setPositiveButton("Yes"){_,_ ->
+        alertDialog.setPositiveButton("Yes") { _, _ ->
             mToDoViewModel.deleteAll()
-            Toast.makeText(requireContext(),"All Deleted", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "All Deleted", Toast.LENGTH_LONG).show()
         }
-        alertDialog.setNegativeButton("No"){_,_ -> }
+        alertDialog.setNegativeButton("No") { _, _ -> }
         alertDialog.setTitle("Do you want to delete all ?")
         alertDialog.setMessage("Are you sure you want to remove all?")
         alertDialog.create().show()
     }
-    private fun showEmptyDatabaseViews(emptyDatabase : Boolean) {
-         if(emptyDatabase == true)
-         {
-             binding.noDataTextView.visibility = View.VISIBLE
-             binding.noDataImage.visibility = View.VISIBLE
-         }else{
-             binding.noDataTextView.visibility = View.INVISIBLE
-             binding.noDataImage.visibility = View.INVISIBLE
-         }
+
+
+
+    private fun setupRecyclerView() {
+        val recyclerView = binding.recyclerView
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(requireActivity())
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
