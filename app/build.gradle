@@ -67,5 +67,6 @@ dependencies {
     implementation "androidx.room:room-ktx:2.5.0"
     androidTestImplementation "androidx.room:room-testing:2.5.0"
 
-
+    // recyclerview animation
+    implementation 'jp.wasabeef:recyclerview-animators:4.0.2'
 }

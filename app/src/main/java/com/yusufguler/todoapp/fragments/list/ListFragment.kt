@@ -3,6 +3,7 @@ package com.yusufguler.todoapp.fragments.list
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -19,8 +20,10 @@ import com.yusufguler.todoapp.data.viewmodel.SharedViewModel
 import com.yusufguler.todoapp.data.viewmodel.ToDoViewModel
 import com.yusufguler.todoapp.databinding.FragmentListBinding
 import com.yusufguler.todoapp.fragments.list.adapter.ListAdapter
+import jp.wasabeef.recyclerview.animators.LandingAnimator
+import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 
-class ListFragment : Fragment() {
+class ListFragment : Fragment(), SearchView.OnQueryTextListener {
 
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
@@ -59,16 +62,49 @@ class ListFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.list_fragment_menu, menu)
+        val search = menu.findItem(R.id.menu_search)
+        val searchView = search.actionView as? SearchView
+        searchView?.isSubmitButtonEnabled = true
+        searchView?.setOnQueryTextListener(this)
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.menu_delete_all) {
-            confirmRemoval()
+        when (item.itemId ) {
+            R.id.menu_delete_all -> confirmRemoval()
+            R.id.menu_priority_high ->mToDoViewModel.sortByHighPriority.observe(this, Observer {
+                adapter.setData(it)
+            })
+            R.id.menu_priority_low ->mToDoViewModel.sortByLowPriority.observe(this,Observer{
+                adapter.setData(it)
+            })
         }
 
         return super.onOptionsItemSelected(item)
     }
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        if (query!=null){
+            searchTroughDatabase(query)
+        }
+        return true
+    }
 
+    override fun onQueryTextChange(newText: String?): Boolean {
+        if (newText!=null){
+            searchTroughDatabase(newText)
+        }
+        return true
+    }
+    private fun searchTroughDatabase(query: String) {
+        var searchQuery : String = query
+        searchQuery = "%$searchQuery%"
+
+        mToDoViewModel.searchDatabase(searchQuery).observe(this, Observer {list->
+            list?.let {
+                adapter.setData(it)
+            }
+        })
+    }
     //Show AlertDialog to Confirm Removal of All Items from Data Base Table
     private fun confirmRemoval() {
         val alertDialog = AlertDialog.Builder(requireContext())
@@ -88,7 +124,9 @@ class ListFragment : Fragment() {
         val recyclerView = binding.recyclerView
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireActivity())
-
+        recyclerView.itemAnimator = SlideInUpAnimator().apply {
+            addDuration = 300
+        }
         // Swipe to delete
         swipeToDelete(recyclerView)
     }
@@ -123,4 +161,6 @@ class ListFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+
 }
